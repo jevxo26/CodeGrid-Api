@@ -2,9 +2,9 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpCode
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { BrandsService } from './brands.service';
+import { CreateBrandDto } from './dto/create-brand.dto';
+import { UpdateBrandDto } from './dto/update-brand.dto';
 
 const storageConfig = diskStorage({
   destination: './uploads',
@@ -22,24 +22,24 @@ const fileFilterConfig = (req: any, file: Express.Multer.File, callback: any) =>
   callback(null, true);
 };
 
-@Controller('users')
-export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+@Controller('brands')
+export class BrandsController {
+  constructor(private readonly brandsService: BrandsService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('picture', { storage: storageConfig, fileFilter: fileFilterConfig }))
   async create(
-    @Body() createUserDto: CreateUserDto,
+    @Body() createBrandDto: CreateBrandDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     if (file) {
-      createUserDto.picture = `/uploads/${file.filename}`;
+      createBrandDto.picture = `/uploads/${file.filename}`;
     }
-    const data = await this.usersService.create(createUserDto);
+    const data = await this.brandsService.create(createBrandDto);
     return {
       statusCode: HttpStatus.CREATED,
-      message: 'User created successfully',
+      message: 'Brand created successfully',
       data,
     };
   }
@@ -47,10 +47,10 @@ export class UsersController {
   @Get()
   @HttpCode(HttpStatus.OK)
   async findAll() {
-    const data = await this.usersService.findAll();
+    const data = await this.brandsService.findAll();
     return {
       statusCode: HttpStatus.OK,
-      message: 'Users retrieved successfully',
+      message: 'Brands retrieved successfully',
       data,
     };
   }
@@ -58,10 +58,10 @@ export class UsersController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async findOne(@Param('id') id: string) {
-    const data = await this.usersService.findOne(+id);
+    const data = await this.brandsService.findOne(+id);
     return {
       statusCode: HttpStatus.OK,
-      message: 'User retrieved successfully',
+      message: 'Brand retrieved successfully',
       data,
     };
   }
@@ -71,16 +71,16 @@ export class UsersController {
   @UseInterceptors(FileInterceptor('picture', { storage: storageConfig, fileFilter: fileFilterConfig }))
   async update(
     @Param('id') id: string, 
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() updateBrandDto: UpdateBrandDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     if (file) {
-      updateUserDto.picture = `/uploads/${file.filename}`;
+      updateBrandDto.picture = `/uploads/${file.filename}`;
     }
-    const data = await this.usersService.update(+id, updateUserDto);
+    const data = await this.brandsService.update(+id, updateBrandDto);
     return {
       statusCode: HttpStatus.OK,
-      message: 'User updated successfully',
+      message: 'Brand updated successfully',
       data,
     };
   }
@@ -88,21 +88,10 @@ export class UsersController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   async remove(@Param('id') id: string) {
-    await this.usersService.remove(+id);
+    await this.brandsService.remove(+id);
     return {
       statusCode: HttpStatus.OK,
-      message: 'User deleted successfully',
-    };
-  }
-
-  @Patch(':id/ban')
-  @HttpCode(HttpStatus.OK)
-  async banUser(@Param('id') id: string, @Body('isBanned') isBanned: boolean) {
-    const data = await this.usersService.banUser(+id, isBanned);
-    return {
-      statusCode: HttpStatus.OK,
-      message: isBanned ? 'User banned successfully' : 'User unbanned successfully',
-      data,
+      message: 'Brand deleted successfully',
     };
   }
 }
