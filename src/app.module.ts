@@ -9,6 +9,11 @@ import { CdnModule } from './cdn/cdn.module';
 import { CategoryModule } from './category/category.module';
 import { SubCategoryModule } from './sub-category/sub-category.module';
 import { BrandsModule } from './brands/brands.module';
+import { ProductsModule } from './products/products.module';
+import { SizeModule } from './size/size.module';
+import { TypesModule } from './types/types.module';
+import { FlashsellModule } from './flashsell/flashsell.module';
+import { BudgetPickModule } from './budget-pick/budget-pick.module';
 
 @Module({
   imports: [
@@ -35,6 +40,11 @@ import { BrandsModule } from './brands/brands.module';
     CategoryModule,
     SubCategoryModule,
     BrandsModule,
+    ProductsModule,
+    SizeModule,
+    TypesModule,
+    FlashsellModule,
+    BudgetPickModule,
   ],
   controllers: [AppController],
   providers: [AppService],

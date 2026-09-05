@@ -1,0 +1,89 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { Product } from './entities/product.entity';
+
+@Injectable()
+export class ProductsService {
+  constructor(
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
+  ) {}
+
+  async create(createProductDto: CreateProductDto): Promise<Product> {
+    const { categoryId, subCategoryId, brandId, sizeIds, typeIds, ...rest } = createProductDto;
+    
+    const product = this.productRepository.create({
+      ...rest,
+      category: categoryId ? { id: categoryId } : undefined,
+      subCategory: subCategoryId ? { id: subCategoryId } : undefined,
+      brand: brandId ? { id: brandId } : undefined,
+      sizes: sizeIds?.length ? sizeIds.map(id => ({ id })) : undefined,
+      types: typeIds?.length ? typeIds.map(id => ({ id })) : undefined,
+    });
+    
+    return await this.productRepository.save(product);
+  }
+
+  async findAll(): Promise<Product[]> {
+    return await this.productRepository.find({
+      relations: {
+        category: true,
+        subCategory: true,
+        brand: true,
+        sizes: true,
+        types: true,
+      },
+    });
+  }
+
+  async findOne(id: number): Promise<Product> {
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: {
+        category: true,
+        subCategory: true,
+        brand: true,
+        sizes: true,
+        types: true,
+      },
+    });
+    
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+    return product;
+  }
+
+  async update(id: number, updateProductDto: UpdateProductDto): Promise<Product> {
+    const product = await this.findOne(id);
+    const { categoryId, subCategoryId, brandId, sizeIds, typeIds, ...rest } = updateProductDto;
+
+    const updatedData: any = { ...rest };
+    if (categoryId !== undefined) {
+      updatedData.category = categoryId ? { id: categoryId } : null;
+    }
+    if (subCategoryId !== undefined) {
+      updatedData.subCategory = subCategoryId ? { id: subCategoryId } : null;
+    }
+    if (brandId !== undefined) {
+      updatedData.brand = brandId ? { id: brandId } : null;
+    }
+    if (sizeIds !== undefined) {
+      updatedData.sizes = sizeIds?.length ? sizeIds.map(id => ({ id })) : [];
+    }
+    if (typeIds !== undefined) {
+      updatedData.types = typeIds?.length ? typeIds.map(id => ({ id })) : [];
+    }
+
+    const updatedProduct = this.productRepository.merge(product, updatedData);
+    return await this.productRepository.save(updatedProduct);
+  }
+
+  async remove(id: number): Promise<void> {
+    const product = await this.findOne(id);
+    await this.productRepository.remove(product);
+  }
+}

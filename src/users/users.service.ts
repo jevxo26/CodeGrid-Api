@@ -11,12 +11,12 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const saltOrRounds = 10;
     const hashedPassword = await bcrypt.hash(createUserDto.password, saltOrRounds);
-    
+
     const user = this.userRepository.create({
       ...createUserDto,
       password: hashedPassword,
@@ -50,7 +50,7 @@ export class UsersService {
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
-    
+
     if (updateUserDto.password) {
       const saltOrRounds = 10;
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, saltOrRounds);
