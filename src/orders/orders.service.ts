@@ -3,14 +3,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { Order } from './entities/order.entity';
+import { Order, OrderStatus } from './entities/order.entity';
 import { MailService } from '../mail/mail.service';
-
+import { Inventory } from '../inventory/entities/inventory.entity';
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
+    @InjectRepository(Inventory)
+    private readonly inventoryRepository: Repository<Inventory>,
     private readonly mailService: MailService,
   ) {}
 
@@ -84,6 +86,28 @@ export class OrdersService {
     const updatedOrder = await this.orderRepository.save(order);
 
     if (oldStatus !== status) {
+      if (status === OrderStatus.SHIPPED) {
+        for (const item of updatedOrder.items) {
+          if (item.product?.title) {
+            const inventory = await this.inventoryRepository.findOne({ where: { product: item.product.title } });
+            if (inventory) {
+              inventory.stock = Math.max(0, inventory.stock - item.quantity);
+              await this.inventoryRepository.save(inventory);
+            }
+          }
+        }
+      } else if (status === OrderStatus.REFUNDED) {
+        for (const item of updatedOrder.items) {
+          if (item.product?.title) {
+            const inventory = await this.inventoryRepository.findOne({ where: { product: item.product.title } });
+            if (inventory) {
+              inventory.stock += item.quantity;
+              await this.inventoryRepository.save(inventory);
+            }
+          }
+        }
+      }
+
       if (updatedOrder.user && updatedOrder.user.email) {
         this.mailService.sendOrderStatusUpdateEmail(
           updatedOrder.user.email,

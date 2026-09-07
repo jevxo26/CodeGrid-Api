@@ -7,6 +7,18 @@ export enum OrderStatus {
   PROCESSING = 'Processing',
   SHIPPED = 'Shipped',
   DELIVERED = 'Delivered',
+  REFUNDED = 'Refunded',
+}
+
+export enum PaymentMethod {
+  COD = 'COD',
+  BKASH = 'Bkash',
+}
+
+export enum DeliveryType {
+  INSIDE_DHAKA = 'INSIDE_DHAKA',
+  OUTSIDE_DHAKA = 'OUTSIDE_DHAKA',
+  DHAKA_SUBURBS = 'DHAKA_SUBURBS',
 }
 
 @Entity('orders')
@@ -30,6 +42,26 @@ export class Order {
     default: OrderStatus.PENDING,
   })
   status: OrderStatus;
+
+  @Column({
+    type: 'enum',
+    enum: PaymentMethod,
+    default: PaymentMethod.COD,
+  })
+  paymentMethod: PaymentMethod;
+
+  @Column({
+    type: 'enum',
+    enum: DeliveryType,
+    default: DeliveryType.INSIDE_DHAKA,
+  })
+  deliveryType: DeliveryType;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 65 })
+  deliveryFee: number;
+
+  @Column({ type: 'text', nullable: true })
+  orderNotes: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   totalAmount: number;

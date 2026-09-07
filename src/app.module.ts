@@ -21,6 +21,10 @@ import { IncompleteOrdersModule } from './incomplete-orders/incomplete-orders.mo
 import { BannersModule } from './banners/banners.module';
 import { BlogsModule } from './blogs/blogs.module';
 import { FeedbackModule } from './feedback/feedback.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { CalculatorModule } from './calculator/calculator.module';
+import { SettingsModule } from './settings/settings.module';
+import { CampaignNoticeModule } from './campaign-notice/campaign-notice.module';
 
 @Module({
   imports: [
@@ -59,6 +63,10 @@ import { FeedbackModule } from './feedback/feedback.module';
     BannersModule,
     BlogsModule,
     FeedbackModule,
+    InventoryModule,
+    CalculatorModule,
+    SettingsModule,
+    CampaignNoticeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
