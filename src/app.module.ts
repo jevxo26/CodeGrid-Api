@@ -14,6 +14,13 @@ import { SizeModule } from './size/size.module';
 import { TypesModule } from './types/types.module';
 import { FlashsellModule } from './flashsell/flashsell.module';
 import { BudgetPickModule } from './budget-pick/budget-pick.module';
+import { CustomProductsModule } from './custom-products/custom-products.module';
+import { OrdersModule } from './orders/orders.module';
+import { CustomOrdersModule } from './custom-orders/custom-orders.module';
+import { IncompleteOrdersModule } from './incomplete-orders/incomplete-orders.module';
+import { BannersModule } from './banners/banners.module';
+import { BlogsModule } from './blogs/blogs.module';
+import { FeedbackModule } from './feedback/feedback.module';
 
 @Module({
   imports: [
@@ -45,6 +52,13 @@ import { BudgetPickModule } from './budget-pick/budget-pick.module';
     TypesModule,
     FlashsellModule,
     BudgetPickModule,
+    CustomProductsModule,
+    OrdersModule,
+    CustomOrdersModule,
+    IncompleteOrdersModule,
+    BannersModule,
+    BlogsModule,
+    FeedbackModule,
   ],
   controllers: [AppController],
   providers: [AppService],
