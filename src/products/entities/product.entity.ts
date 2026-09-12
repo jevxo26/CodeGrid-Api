@@ -19,6 +19,9 @@ export class Product {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   currentPrice: number;
 
+  @Column({ type: 'int', default: 0 })
+  stock: number;
+
   @Column({ nullable: true })
   variantLabel: string;
 

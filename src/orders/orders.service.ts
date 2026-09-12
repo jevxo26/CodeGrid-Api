@@ -5,14 +5,16 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Order, OrderStatus } from './entities/order.entity';
 import { MailService } from '../mail/mail.service';
-import { Inventory } from '../inventory/entities/inventory.entity';
+import { InventoryService } from '../inventory/inventory.service';
+import { Product } from '../products/entities/product.entity';
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
-    @InjectRepository(Inventory)
-    private readonly inventoryRepository: Repository<Inventory>,
+    private readonly inventoryService: InventoryService,
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
     private readonly mailService: MailService,
   ) {}
 
@@ -86,23 +88,39 @@ export class OrdersService {
     const updatedOrder = await this.orderRepository.save(order);
 
     if (oldStatus !== status) {
-      if (status === OrderStatus.SHIPPED) {
+      // Deduct stock if order is moving from PENDING to PROCESSING or SHIPPED
+      const isConfirmed = status === OrderStatus.PROCESSING || status === OrderStatus.SHIPPED;
+      const wasConfirmed = oldStatus === OrderStatus.PROCESSING || oldStatus === OrderStatus.SHIPPED;
+
+      if (isConfirmed && !wasConfirmed) {
         for (const item of updatedOrder.items) {
           if (item.product?.title) {
-            const inventory = await this.inventoryRepository.findOne({ where: { product: item.product.title } });
-            if (inventory) {
-              inventory.stock = Math.max(0, inventory.stock - item.quantity);
-              await this.inventoryRepository.save(inventory);
+            await this.inventoryService.adjustStockByProduct(
+              item.product.title,
+              -item.quantity,
+              `Order #${updatedOrder.id} confirmed`
+            );
+            
+            const productEntity = await this.productRepository.findOne({ where: { title: item.product.title } });
+            if (productEntity) {
+              productEntity.stock = Math.max(0, (productEntity.stock || 0) - item.quantity);
+              await this.productRepository.save(productEntity);
             }
           }
         }
       } else if (status === OrderStatus.REFUNDED) {
         for (const item of updatedOrder.items) {
           if (item.product?.title) {
-            const inventory = await this.inventoryRepository.findOne({ where: { product: item.product.title } });
-            if (inventory) {
-              inventory.stock += item.quantity;
-              await this.inventoryRepository.save(inventory);
+            await this.inventoryService.adjustStockByProduct(
+              item.product.title,
+              item.quantity,
+              `Order #${updatedOrder.id} refunded`
+            );
+
+            const productEntity = await this.productRepository.findOne({ where: { title: item.product.title } });
+            if (productEntity) {
+              productEntity.stock = (productEntity.stock || 0) + item.quantity;
+              await this.productRepository.save(productEntity);
             }
           }
         }

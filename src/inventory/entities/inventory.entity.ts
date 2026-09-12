@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { StockHistory } from './stock-history.entity';
 
 export enum InventoryStatus {
   IN_STOCK = 'In Stock',
@@ -32,4 +33,7 @@ export class Inventory {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => StockHistory, (history) => history.inventory, { cascade: true })
+  history: StockHistory[];
 }

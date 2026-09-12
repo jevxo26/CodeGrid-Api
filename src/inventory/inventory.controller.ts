@@ -22,6 +22,11 @@ export class InventoryController {
     return await this.inventoryService.findOne(+id);
   }
 
+  @Get(':id/history')
+  async getHistory(@Param('id') id: string) {
+    return await this.inventoryService.getHistory(+id);
+  }
+
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateInventoryDto: UpdateInventoryDto) {
     return await this.inventoryService.update(+id, updateInventoryDto);

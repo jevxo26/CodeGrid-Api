@@ -25,6 +25,8 @@ import { InventoryModule } from './inventory/inventory.module';
 import { CalculatorModule } from './calculator/calculator.module';
 import { SettingsModule } from './settings/settings.module';
 import { CampaignNoticeModule } from './campaign-notice/campaign-notice.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -67,6 +69,8 @@ import { CampaignNoticeModule } from './campaign-notice/campaign-notice.module';
     CalculatorModule,
     SettingsModule,
     CampaignNoticeModule,
+    DashboardModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
